@@ -1,32 +1,26 @@
-const express = require('express');
-const cors = require('cors');
-const { Pool } = require('pg');
-const app = express();
-app.use(cors());
-app.use(express.json());
-// الاتصال بقاعدة Neon PostgreSQL عب ر متغي ر البيئ ة
+import { Pool } from "pg";
 const pool = new Pool({
 connectionString: process.env.DATABASE_URL,
-ssl: {
-rejectUnauthorized: false
-}
+ssl: { rejectUnauthorized: false }
 });
-// Route لاستقبال بيانات المستشع ر
-app.post('/api/sensor', async (req, res) => {
-const { sensor, spo2, heartRate } = req.body;
+export default async function handler(req, res) {
+if (req.method !== "POST") {
+return res.status(405).json({ error: "Method not allowed" });
+}
 try {
-const result = await pool.query(
-'INSERT INTO sensor_data (sensor, spo2, heart_rate) VALUES ($1, $2, $3) RETURNING *',
-[sensor, spo2, heartRate]
-);
-res.status(200).json({ message: 'Data saved successfully', data: result.rows[0] });
-} catch (err) {
-console.error(err);
-res.status(500).json({ message: 'Error saving data' });
+const { spo2, heartrate, red, ir } = req.body;
+if (typeof spo2 === 'undefined' || typeof heartrate === 'undefined' || typeof red === 'undefined' || typeof ir === 'undefined') {
+return res.status(400).json({ error: "Missing sensor data" });
 }
-});
-// Test route
-app.get('/', (req, res) => {
-res.send('Server is running on Vercel!');
-});
-module.exports = app;
+const query = `
+INSERT INTO max30102_readings (spo2, heartrate, red, ir, created_at)
+VALUES ($1, $2, $3, $4, NOW())
+RETURNING id, created_at;
+`;
+const result = await pool.query(query, [spo2, heartrate, red, ir]);
+return res.status(200).json({ message: "Data inserted successfully", row: result.rows[0] });
+} catch (error) {
+console.error('DB ERROR:', error);
+return res.status(500).json({ error: "Server error", details: error.message });
+}
+}
