@@ -1,17 +1,17 @@
 {
-"version": 2,
-"builds": [
-{
-"src": "sensor.js",
-"use": "@vercel/node"
-}
+   "version": 2,
+   "builds": [
+    {
+      "src": "sensor.js",
+      "use": "@vercel/node"
+   }
 ],
 "routes": [
-{
-"src": "/api/sensor",
-"methods":["POST"],
-"dest": "/sensor.js"
-}
+  {
+     "src": "/api/sensor",
+     "methods":["POST"],
+     "dest": "/sensor.js"
+  }
 ]
 }
 
