@@ -9,7 +9,7 @@
 "routes": [
 {
 "src": "/api/sensor",
-"methods": "["POST"],
+"methods": ["POST"],
 "dest": "/sensor.js"
 }
 ]
