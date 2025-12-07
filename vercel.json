@@ -8,15 +8,10 @@
 ],
 "routes": [
 {
-"src": "/api/(.*)",
+"src": "/api/sensor",
+"methods":["POST"],
 "dest": "/sensor.js"
 }
-],
-"env": {
-"DB_HOST": "@neon_host",
-"DB_USER": "@neon_user",
-"DB_PASSWORD": "@neon_password",
-"DB_NAME": "@neon_db",
-"DB_PORT": "@neon_port"
+]
 }
-}
+
