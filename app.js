@@ -1,39 +1,32 @@
-const express = require("express");
-const cors = require("cors");
-const { Pool } = require("pg");
-require("dotenv").config();
+const express = require('express');
+const cors = require('cors');
+const { Pool } = require('pg');
 const app = express();
 app.use(cors());
 app.use(express.json());
-// PostgreSQL connection
+// الاتصال بقاعدة Neon PostgreSQL عب ر متغي ر البيئ ة
 const pool = new Pool({
 connectionString: process.env.DATABASE_URL,
-ssl: { rejectUnauthorized: false }
-});
-// Test Route
-app.get("/", (req, res) => {
-res.send("Server is running on Railway ");
-});
-// Receive sensor data from ESP32
-app.post("/sensor", async (req, res) => {
-try {
-const { spo2, heartrate, red, ir } = req.body;
-if (!spo2 || !heartrate || !red || !ir) {
-return res.status(400).json({ error: "Missing sensor data" });
+ssl: {
+rejectUnauthorized: false
 }
-const query = `
-INSERT INTO max30102_readings (spo2, heartrate, red, ir, created_at)
-VALUES ($1, $2, $3, $4, NOW())
-`;
-await pool.query(query, [spo2, heartrate, red, ir]);
-res.json({ message: "Data inserted successfully" });
+});
+// Route لاستقبال بيانات المستشع ر
+app.post('/api/sensor', async (req, res) => {
+const { sensor, spo2, heartRate } = req.body;
+try {
+const result = await pool.query(
+'INSERT INTO sensor_data (sensor, spo2, heart_rate) VALUES ($1, $2, $3) RETURNING *',
+[sensor, spo2, heartRate]
+);
+res.status(200).json({ message: 'Data saved successfully', data: result.rows[0] });
 } catch (err) {
 console.error(err);
-res.status(500).json({ error: "Server error" });
+res.status(500).json({ message: 'Error saving data' });
 }
 });
-// Start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-console.log("Server running on port " + PORT);
+// Test route
+app.get('/', (req, res) => {
+res.send('Server is running on Vercel!');
 });
+module.exports = app;
