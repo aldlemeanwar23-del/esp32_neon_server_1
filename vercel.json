@@ -1,9 +1,22 @@
 {
 "version": 2,
 "builds": [
-{ "src": "api/*.js", "use": "@vercel/node" }
+{
+"src": "sensor.js",
+"use": "@vercel/node"
+}
 ],
 "routes": [
-{ "src": "/api/(.*)", "dest": "/api/$1" }
-]
+{
+"src": "/api/(.*)",
+"dest": "/sensor.js"
+}
+],
+"env": {
+"DB_HOST": "@neon_host",
+"DB_USER": "@neon_user",
+"DB_PASSWORD": "@neon_password",
+"DB_NAME": "@neon_db",
+"DB_PORT": "@neon_port"
+}
 }
