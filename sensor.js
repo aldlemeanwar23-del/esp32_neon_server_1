@@ -2,19 +2,20 @@ const express = require("express");
 const { Pool } = require("pg");
 const cors = require("cors");
 const helmet = require("helmet");
+
 const app = express();
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
+
 // إعدادات قاعدة Neon PostgreSQL
 const pool = new Pool({
-host: "YOUR_NEON_HOST", // مثال : "ep-snowy-sky-12345.us-east-1.aws.neon.tech"
-user: "YOUR_NEON_USER",
-password: "YOUR_NEON_PASSWORD",
-database: "YOUR_NEON_DB",
-port: 5432,
+  connectionString:
+    "postgresql://neondb_owner:npg_7tlz6VPCJnGe@ep-crimson-lake-ag2d88hh-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+
 ssl: { rejectUnauthorized: false } // Neon يتطلب SSL
 });
+
 // إنشاء جدول إذا لم يكن موجود
 const createTable = `
 CREATE TABLE IF NOT EXISTS sensor_data (
