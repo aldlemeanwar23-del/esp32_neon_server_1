@@ -1,0 +1,48 @@
+const express = require("express");
+const { Pool } = require("pg");
+const cors = require("cors");
+const helmet = require("helmet");
+const app = express();
+app.use(cors());
+app.use(helmet());
+app.use(express.json());
+// إعدادات قاعدة Neon PostgreSQL
+const pool = new Pool({
+host: "YOUR_NEON_HOST", // مثال : "ep-snowy-sky-12345.us-east-1.aws.neon.tech"
+user: "YOUR_NEON_USER",
+password: "YOUR_NEON_PASSWORD",
+database: "YOUR_NEON_DB",
+port: 5432,
+ssl: { rejectUnauthorized: false } // Neon يتطلب SSL
+});
+// إنشاء جدول إذا لم يكن موجود
+const createTable = `
+CREATE TABLE IF NOT EXISTS sensor_data (
+id SERIAL PRIMARY KEY,
+spo2 INT,
+heart_rate INT,
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+`;
+pool.query(createTable).catch(err => console.error(err));
+// استقبال البيانات من ESP32
+app.post("/api/sensor", async (req, res) => {
+const { spo2, heart_rate } = req.body;
+if (spo2 === undefined || heart_rate === undefined) {
+return res.status(400).json({ message: "Missing sensor data" });
+}
+try {
+const query = "INSERT INTO sensor_data (spo2, heart_rate) VALUES ($1, $2) RETURNING *";
+const values = [spo2, heart_rate];
+const result = await pool.query(query, values);
+res.status(200).json({ message: "Data saved", data: result.rows[0] });
+} catch (err) {
+console.error(err);
+res.status(500).json({ message: "Error saving data", error: err });
+}
+});
+// تشغيل السيرفر
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+console.log(`Server running on port ${PORT}`);
+});
