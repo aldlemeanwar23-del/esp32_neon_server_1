@@ -1,12 +1,14 @@
 {
 "name": "esp32-neon-vercel",
 "version": "1.0.0",
-"main": "api/sensor.js",
-"license":"MIT",
- "type":"module",
+"main": "sensor.js",
+"scripts": {
+"start": "node sensor.js"
+},
 "dependencies": {
-"pg": "latest"
+"express": "^4.18.2",
+"pg": "^8.12.0",
+"cors": "^2.8.5",
+"helmet": "^7.0.0"
 }
 }
-
-
